@@ -56,6 +56,14 @@ services:
       REDIS_ADDR: redis:6379
       PUBLIC_USER_URL: ${PUBLIC_USER_URL}
       JWT_SECRET: ${JWT_SECRET}
+      MINIO_ADDR: minio:9000
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+      MINIO_BUCKETS: ${MINIO_BUCKETS:-}
+    volumes:
+      - rclone-config:/root/.config/rclone
+      - backup-tmp:/tmp/backups
+      - ../booking-doan-infra:/infra-snapshot:ro
     depends_on:
       postgres:
         condition: service_healthy
@@ -63,6 +71,8 @@ services:
         condition: service_healthy
       migrate:
         condition: service_completed_successfully
+      minio:
+        condition: service_started
 
   admin:
     build:
@@ -94,3 +104,7 @@ services:
 volumes:
   pg-data:
   minio-data:
+  rclone-config:
+    name: booking-doan-rclone-config
+  backup-tmp:
+    name: booking-doan-backup-tmp
